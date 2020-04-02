@@ -1,0 +1,184 @@
+swagger: "2.0"
+info:
+  description: "Data Collector"
+  version: "1.0.0"
+  title: "Data Collector"
+  contact:
+    email: "rodmoten@gmail.com"
+host: "petstore.swagger.io"
+basePath: "/v1"
+schemes:
+- "https"
+- "http"
+paths:
+  /register:
+    post:
+      tags:
+      - "contacts"
+      summary: "Register user"
+      description: ""
+      operationId: "register"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Register person to contribute data"
+        required: true
+        schema:
+          $ref: "#/definitions/Contributor"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/ContributorKey"
+        405:
+          description: "Invalid input"
+          schema:
+            $ref: '#/definitions/ApiResponse'
+  /report/{contributor_id}:
+    post:
+      tags:
+      - "contacts"
+      summary: "Report data"
+      description: "Reprot data"
+      operationId: "report"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: contributor_id
+        in: path
+        required: true
+        type: string
+      - name: "body"
+        in: "body"
+        description: "Report data"
+        required: true
+        schema:
+          $ref: "#/definitions/Report"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "string"
+        405:
+          description: "Invalid input"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ApiResponse'
+  /descriptions:
+    get:
+      tags:
+      - "contacts"
+      summary: "Relationship descriptions"
+      description: "Get the descriptions of each relationship"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "success"
+          schema:
+            $ref: '#/definitions/RelationshipDescriptions'
+definitions:
+  Contributor:
+    type: "object"
+    required:
+    - "email"
+    - "zipcode"
+    - "age"
+    properties:
+      email:
+        type: "string"
+        format: "email"
+      zipcode:
+        type: "integer"
+        format: "[0-9][0-9][0-9][0-9][0-9]"
+      age:
+        type: "integer"
+        format: "[0-9][0-9]?"
+  ContributorKey:
+    type: "object"
+    required:
+    - "id"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+  Report:
+    type: "object"
+    required: 
+    - contacts
+    properties:
+      contacts:
+        type: array
+        items: 
+          $ref: '#/definitions/Contact'
+      message:
+        type: "string"
+  Contact:
+    type: "object"
+    required:
+    - amount
+    - duration
+    - relationship
+    properties:
+      amount:
+        type: integer
+        format: int64
+        minimum: 0
+        maximum: 100000
+        description: "Number of people contacted"
+      duration:
+        description: "The length of time of the contact"
+        type: string
+        enum:
+        - "< 1 minutes"
+        - "2 - 5 minutes"
+        - "5 - 10 minutes"
+        - "11 - 20 minutes"
+        - "> 20 minutes"
+      kind:
+        description: "The relationship the contributor had with the contacts"
+        type: string
+        enum:
+        - "coworker"
+        - "coinhabitant"
+        - "classmate"
+        - "customer/client"
+        - "stranger"
+        - "family"
+        - "friend/peer/neighbor"
+  RelationshipDescriptions:
+    type: "object"
+    properties:
+      description:
+        type: string
+        enum:
+        - "coworker - Some one you work with periodically. You both perform tasks for same employer or organization. Could be a manager or subordinate."
+        - "classmate"
+        - "customer/client - A person whom you provide services for which you or someone else gets a monetary benefit"
+        - "coinhabitant - Someone you live with"
+        - "stranger - Someone you don't know and you don't know a meaningful relationship with"
+        - "family"
+        - "friend/peer/neighbor - A friend of any type, such as acquaintence or close. A person who belongs to the same club, group or organization. Someone who lives near you."
+  ApiResponse:
+    type: "object"
+    required: 
+    - code
+    - message
+    properties:
+      code:
+        type: "string"
+        enum:
+        - "success"
+        - "already-registred"
+        - ""
+      message:
+        type: "string"
